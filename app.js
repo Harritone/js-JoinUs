@@ -1,34 +1,17 @@
-import faker from 'faker';
-import mysql from 'mysql';
-import { mysqlPass } from './mysqlpass.js';
+import express from 'express';
+import { connection } from './db.js';
 
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: mysqlPass,
-  database: 'join_us',
+const app = express();
+
+app.get('/', (req, res) => {
+  const q = 'SELECT COUNT(*) as count FROM users';
+  connection.query(q, (error, result) => {
+    if (error) throw error;
+    const msg = `We have ${result[0].count} users`;
+    res.send(msg);
+  });
 });
 
-// Selecting DATA
-// const q = 'SELECT COUNT(*) AS total FROM users';
-
-// connection.query(q, (error, result, fields) => {
-//   if (error) throw error;
-//   console.log(result[0].total);
-// });
-
-// Inserting data
-
-const users = [];
-
-for (let i = 0; i < 500; i++) {
-  users.push([faker.internet.email(), faker.date.past()]);
-}
-console.log(users.length);
-const q = 'INSERT INTO users(email, created_at) VALUES ?';
-
-connection.query(q, [users], (error, result) => {
-  console.log(error);
-  console.log(result);
+app.listen(8080, () => {
+  console.log('Server running on 8080');
 });
-connection.end();
